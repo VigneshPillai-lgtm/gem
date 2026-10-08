@@ -2,6 +2,8 @@
 
 CodeSketch-AI turns a hand-drawn software architecture diagram into a practical project scaffold. Upload a whiteboard or paper sketch, choose a target backend stack, and let Gemma 4 describe the detected components, data flow, project structure, Docker Compose setup, and starter API server.
 
+The production web version is a Vercel-compatible Python API with a static browser UI. The original Streamlit implementation remains in [`app.py`](./app.py) for local experimentation.
+
 ## Features
 
 - Upload PNG, JPG, or JPEG architecture sketches.
@@ -22,7 +24,7 @@ CodeSketch-AI turns a hand-drawn software architecture diagram into a practical 
 - Python 3.10 or later
 - A Google GenAI API key with access to the configured Gemma model
 
-## Quick start
+## Local Vercel-compatible version
 
 1. Clone the repository:
 
@@ -62,13 +64,21 @@ CodeSketch-AI turns a hand-drawn software architecture diagram into a practical 
    $env:GOOGLE_API_KEY = "your-api-key"
    ```
 
-5. Start the app:
+5. Start the API locally with your preferred WSGI server, or deploy it to Vercel:
 
    ```bash
-   streamlit run app.py
+   flask --app api.index run
    ```
 
-6. Open the local URL printed by Streamlit, upload an architecture sketch, select a backend framework, and click **Scaffold Project with Gemma 4**.
+The browser UI is in [`public/index.html`](./public/index.html). Vercel serves it at `/` and routes generation requests to [`api/index.py`](./api/index.py).
+
+## Streamlit version
+
+To run the original Streamlit interface:
+
+```bash
+streamlit run app.py
+```
 
 ## Configuration
 

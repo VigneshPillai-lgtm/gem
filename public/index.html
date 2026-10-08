@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CodeSketch-AI</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, system-ui, sans-serif; }
+      body { margin: 0; background: #10131a; color: #eef2ff; }
+      main { max-width: 1180px; margin: 0 auto; padding: 40px 20px; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+      .card { background: #191e2a; border: 1px solid #30384b; border-radius: 14px; padding: 24px; }
+      h1 { margin: 0 0 8px; } h2 { margin-top: 0; font-size: 1.1rem; }
+      .muted { color: #aab4ca; }
+      input, select, button { width: 100%; box-sizing: border-box; margin-top: 10px; padding: 12px; border-radius: 8px; border: 1px solid #46516a; background: #10131a; color: inherit; }
+      button { background: #6558f5; border: 0; cursor: pointer; font-weight: 700; }
+      button:disabled { opacity: .55; cursor: wait; }
+      img { max-width: 100%; max-height: 400px; display: block; margin-top: 16px; border-radius: 8px; }
+      #output { white-space: pre-wrap; overflow: auto; line-height: 1.5; }
+      .error { color: #ff9b9b; } @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>📐 CodeSketch-AI</h1>
+      <p class="muted">Turn a hand-drawn architecture diagram into a project scaffold with Gemma 4.</p>
+      <div class="grid">
+        <section class="card">
+          <h2>📷 Upload Architecture</h2>
+          <form id="form">
+            <label for="image">Whiteboard or paper diagram</label>
+            <input id="image" name="image" type="file" accept=".jpg,.jpeg,.png" required>
+            <img id="preview" alt="Selected architecture sketch" hidden>
+            <label for="stack">Target backend framework</label>
+            <select id="stack" name="stack">
+              <option value="fastapi">FastAPI (Python) + Docker</option>
+              <option value="express">Express.js (Node.js) + Docker</option>
+              <option value="go">Go (Gin) + Docker</option>
+            </select>
+            <button id="submit" type="submit">🚀 Scaffold Project with Gemma 4</button>
+          </form>
+        </section>
+        <section class="card">
+          <h2>🛠️ Generated Architecture &amp; Boilerplate</h2>
+          <p id="status" class="muted">Upload a diagram to begin.</p>
+          <div id="output"></div>
+        </section>
+      </div>
+    </main>
+    <script>
+      const form = document.querySelector("#form");
+      const image = document.querySelector("#image");
+      const preview = document.querySelector("#preview");
+      const submit = document.querySelector("#submit");
+      const status = document.querySelector("#status");
+      const output = document.querySelector("#output");
+
+      image.addEventListener("change", () => {
+        const file = image.files[0];
+        if (!file) return;
+        preview.src = URL.createObjectURL(file);
+        preview.hidden = false;
+      });
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        submit.disabled = true;
+        status.textContent = "Gemma 4 is inspecting the diagram...";
+        output.textContent = "";
+        try {
+          const response = await fetch("/api/generate", { method: "POST", body: new FormData(form) });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "Generation failed.");
+          status.textContent = "Scaffold generated.";
+          output.textContent = data.text;
+        } catch (error) {
+          status.textContent = "Generation failed.";
+          output.innerHTML = `<span class="error">${error.message}</span>`;
+        } finally {
+          submit.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
